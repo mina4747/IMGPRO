@@ -1,6 +1,9 @@
 from flask import Flask, request, render_template
 import sqlite3
 import os
+from PIL import ImageFilter
+from PIL import Image
+from PIL import ImageEnhance
 
 app = Flask(__name__)
 
@@ -61,21 +64,55 @@ def add():
 
 @app.route('/choose', methods=['POST'])
 def convert():
-    selected = request.form.get('options') if request.form.get('options') else "nothing niga"
-    print(selected)
-    conn = sqlite3.connect('images.db')
-    c= conn.cursor()
-    list= refrechList()
-    c.execute('SELECT img FROM images WHERE name = ?' , (selected,))
-    data = c.fetchone()
-    with open( selected , 'wb') as file:
-        file.write(data[0])
-    conn.commit()
-    conn.close()
-     
+    selected = request.form.get('options')
+    Filter = request.form.get('Filter')
+    if selected and Filter:
+        print(selected)
+        conn = sqlite3.connect('images.db')
+        c= conn.cursor()
+        list= refrechList()
+        c.execute('SELECT img FROM images WHERE name = ?' , (selected,))
+        data = c.fetchone()
+        with open( "static/hankhanka.jpeg" , 'wb') as file:
+            file.write(data[0])
+        conn.commit()
+        conn.close()
+        if Filter == "cont":
+            adjust_contrast("static/hankhanka.jpeg", "static/hankhanka.jpeg")
+        elif Filter =="sat":
+            adjust_saturation("static/hankhanka.jpeg","static/hankhanka.jpeg")
+        elif Filter =="gray":
+            convert_to_grayscale("static/hankhanka.jpeg","static/hankhanka.jpeg")
+        elif Filter == "blur":
+            apply_blur("static/hankhanka.jpeg","static/hankhanka.jpeg")
+        else:
+            return render_template('index.html', list = list , img = selected)
+               
     return render_template('index.html', list = list , img = selected)
 
+def adjust_saturation(image_path, output_path, factor=1.5):
+    image = Image.open(image_path)
+    enhancer = ImageEnhance.Color(image)
+    saturated_image = enhancer.enhance(factor)
+    saturated_image.save(output_path)
 
+
+def adjust_contrast(image_path, output_path, factor=1.5):
+    image = Image.open(image_path)
+    enhancer = ImageEnhance.Contrast(image)
+    contrasted_image = enhancer.enhance(factor)
+    contrasted_image.save(output_path)
+
+
+def apply_blur(image_path, output_path, radius=5):
+    image = Image.open(image_path)
+    blurred_image = image.filter(ImageFilter.GaussianBlur(radius))
+    blurred_image.save(output_path)
+
+def convert_to_grayscale(image_path, output_path):
+    image = Image.open(image_path)
+    grayscale_image = image.convert("L")
+    grayscale_image.save(output_path)
 
 if __name__ == '__main__':
 

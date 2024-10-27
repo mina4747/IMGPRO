@@ -5,27 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> 
 </head>
 
 <body>
-    <form action="/add" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/png, image/jpeg">
-        <button type="submit">send</button>
-    </form>
-    <form action="/choose" method="post">
-        <select id="options" name="options">
-            {% for value in list %}
-            <option value="{{value[0]}}">{{value[0]}}</option>
-            {% endfor %}
-        </select>
-        <button type="submit">send to convert</button>
-    </form>
-{% if img %}
-<div>
-    <img src="{{url_for('static', filename='hankhanka.jpeg')}}"" alt="">
-</div>
-{% endif %}
+    <div class="container">
+        <form action="/add" method="post" enctype="multipart/form-data" class="upload-form">
+            <input type="file" name="file" accept="image/png, image/jpeg" class="file-input" required>
+            <button type="submit" class="submit-button">Add to DB</button>
+        </form>
+        
+        <form action="/choose" method="post" class="select-form">
+            <select id="options" name="options" class="options-select">
+                {% for value in list %}
+                <option value="{{value[0]}}">{{value[0]}}</option>
+                {% endfor %}
+            </select>
+            <select class="options-select" name="Filter" >
+                <option value="gray">apply graycale filter</option>
+                <option value="blur">apply blur filter</option>
+                <option value="sat">adjust saturation</option>
+                <option value="cont"> adjust contrast</option>
+            </select>
+            <button type="submit" class="submit-button">Send to Convert</button>
+        </form>
 
+        {% if img %}
+        <div class="image-container">
+            <img src="{{url_for('static', filename='hankhanka.jpeg')}}" alt="Uploaded Image" class="uploaded-image">
+        </div>
+        {% endif %}
+    </div>
 </body>
 
 </html>
